@@ -20,9 +20,10 @@ function App() {
 
         {/* ✅ Trang cho học sinh chọn đề */}
         <Route path="/" element={isLoggedIn() ? <SelectTest /> : <Navigate to="/login" replace />} />
-
+        <Route path="/select-test" element={<SelectTest />} />
         {/* ✅ Trang làm bài viết */}
         <Route path="/writing" element={isLoggedIn() ? <WritingTest /> : <Navigate to="/login" replace />} />
+        <Route path="/writing-test" element={<WritingTest />} />
 
         {/* ✅ Trang giáo viên tạo đề */}
         <Route path="/admin/create-writing" element={<CreateWritingTest />} />

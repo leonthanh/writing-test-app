@@ -1,8 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import Split from 'react-split'; // không cần import CSS
-
-const user = JSON.parse(localStorage.getItem('user'));
-const selectedTestId = localStorage.getItem('selectedTestId');
+import Split from 'react-split';
 
 const WritingTest = () => {
   const [task1, setTask1] = useState('');
@@ -14,17 +11,27 @@ const WritingTest = () => {
   const [activeTask, setActiveTask] = useState('task1');
   const [testData, setTestData] = useState(null);
 
-  // Lấy đề thi
-  useEffect(() => {
-    if (selectedTestId) {
-      fetch(`http://localhost:5000/api/writing-tests/${selectedTestId}`)
-        .then(res => res.json())
-        .then(data => setTestData(data))
-        .catch(err => console.error('Lỗi khi tải đề:', err));
-    }
-  }, []);
+  const user = JSON.parse(localStorage.getItem('user'));
+  const selectedTestId = localStorage.getItem('selectedTestId');
 
-  // Hàm nộp bài
+  // Nếu chưa chọn đề
+  if (!selectedTestId) {
+    return (
+      <div style={{ padding: 50, textAlign: 'center' }}>
+        ⚠️ Bạn chưa chọn đề thi. Vui lòng quay lại trang chọn đề.
+      </div>
+    );
+  }
+
+  // Lấy đề từ backend
+  useEffect(() => {
+    fetch(`http://localhost:5000/api/writing-tests/${selectedTestId}`)
+      .then(res => res.json())
+      .then(data => setTestData(data))
+      .catch(err => console.error('Lỗi khi tải đề:', err));
+  }, [selectedTestId]);
+
+  // Nộp bài
   const handleSubmit = useCallback(async () => {
     setSubmitted(true);
     try {
@@ -41,7 +48,7 @@ const WritingTest = () => {
     }
   }, [task1, task2, timeLeft]);
 
-  // Đếm ngược
+  // Đếm ngược thời gian
   useEffect(() => {
     if (!started || submitted) return;
     if (timeLeft <= 0) {
@@ -62,6 +69,10 @@ const WritingTest = () => {
 
   const countWords = text => text.trim().split(/\s+/).filter(Boolean).length;
 
+  if (!testData) {
+    return <div style={{ padding: 50, textAlign: 'center' }}>⏳ Đang tải đề thi...</div>;
+  }
+
   if (!started && !submitted) {
     return (
       <div style={{ padding: 50, textAlign: 'center' }}>
@@ -71,10 +82,6 @@ const WritingTest = () => {
       </div>
     );
   }
-  if (!testData) {
-  return <div style={{ padding: 50, textAlign: 'center' }}>⏳ Đang tải đề thi...</div>;
-  }
-
 
   if (submitted) {
     return (
@@ -106,28 +113,25 @@ const WritingTest = () => {
         </div>
       </div>
 
-      {/* 2 panel chia đôi có thể kéo */}
-      <Split
-        sizes={[50, 50]}
-        minSize={200}
-        gutterSize={8}
-        direction="horizontal"
-        style={{ flexGrow: 1, display: 'flex' }}
-      >
-        {/* Panel trái: đề bài */}
+      {/* Main content */}
+      <Split sizes={[50, 50]} minSize={200} gutterSize={8} direction="horizontal" style={{ flexGrow: 1, display: 'flex' }}>
         <div style={{ padding: 20, overflowY: 'auto' }}>
-          {testData && activeTask === 'task1' && (
+          {activeTask === 'task1' && (
             <>
               <h2>WRITING TASK 1</h2>
               <p>You should spend 20 minutes on this task.</p>
               <p>{testData.task1}</p>
               {testData.task1Image && (
-      <img src={`http://localhost:5000${testData.task1Image}`} alt="Task 1" style={{ maxWidth: '100%', margin: '10px 0' }} />
-    )}
+                <img
+                  src={`http://localhost:5000${testData.task1Image}`}
+                  alt="Task 1"
+                  style={{ maxWidth: '100%', marginTop: 10 }}
+                />
+              )}
               <p><i>Write at least 150 words.</i></p>
             </>
           )}
-          {testData && activeTask === 'task2' && (
+          {activeTask === 'task2' && (
             <>
               <h2>WRITING TASK 2</h2>
               <p>You should spend 40 minutes on this task.</p>
@@ -137,7 +141,6 @@ const WritingTest = () => {
           )}
         </div>
 
-        {/* Panel phải: viết bài */}
         <div style={{ padding: 20, overflowY: 'auto' }}>
           {activeTask === 'task1' && (
             <>
@@ -164,7 +167,7 @@ const WritingTest = () => {
         </div>
       </Split>
 
-      {/* Thanh navbar ở chân trang */}
+      {/* Navbar dưới */}
       <div style={{
         display: 'flex',
         justifyContent: 'center',
@@ -175,16 +178,13 @@ const WritingTest = () => {
         bottom: 0,
         zIndex: 10
       }}>
-        {/* Nút chuyển đổi giữa Task 1 và Task 2 */}
         <button onClick={() => setActiveTask('task1')} style={{ margin: '0 10px' }}>
           Task 1
         </button>
-        {/* Nút chuyển đổi giữa Task 1 và Task 2 */}
         <button onClick={() => setActiveTask('task2')} style={{ margin: '0 10px' }}>
           Task 2
         </button>
-        {/* Nút nộp bài */}
-        <button onClick={handleSubmit} style={{ margin: '0 10px', backgroundColor: '#007e86', color: 'white'}}>
+        <button onClick={handleSubmit} style={{ margin: '0 10px', backgroundColor: '#007e86', color: 'white' }}>
           📩 Nộp bài
         </button>
       </div>
