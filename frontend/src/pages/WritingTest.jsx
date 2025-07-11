@@ -57,11 +57,14 @@ const WritingTest = () => {
     localStorage.removeItem('writing_timeLeft');
     localStorage.removeItem('writing_started');
 
+    const user = JSON.parse(localStorage.getItem('user'));
+    const selectedTestId = localStorage.getItem('selectedTestId');
+
     try {
       const res = await fetch('http://localhost:5000/api/writing/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ task1, task2, timeLeft }),
+        body: JSON.stringify({ task1, task2, timeLeft, user, testId: selectedTestId }),
       });
       const data = await res.json();
       setMessage(data.message || 'Đã nộp bài!');

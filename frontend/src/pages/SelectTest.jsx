@@ -34,7 +34,7 @@ const SelectTest = () => {
               backgroundColor: '#f9f9f9'
             }}
           >
-            <h4>{test.name || `Đề số ${test._id}`}</h4>
+            <h4>{test.name || `Đề số ${test.index || test._id}`}</h4>
             <button onClick={() => handleSelect(test._id)} style={{ marginTop: '10px' }}>
               📝 Chọn đề này
             </button>

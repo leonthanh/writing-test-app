@@ -62,9 +62,12 @@ app.post('/api/auth/login', async (req, res) => {
 
 // Nộp bài viết
 const Submission = require('./models/Submission');
+const WritingTest = require('./models/WritingTests'); // ✅ THÊM DÒNG NÀY
+
 app.post('/api/writing/submit', async (req, res) => {
   try {
-    const { task1, task2, timeLeft } = req.body;
+  
+    const { task1, task2, timeLeft, user, testId } = req.body;
     const newSubmission = new Submission({ task1, task2, timeLeft });
     await newSubmission.save();
 
@@ -76,18 +79,22 @@ app.post('/api/writing/submit', async (req, res) => {
         pass: process.env.EMAIL_PASS,
       },
     });
-
+      const test = await WritingTest.findById(testId);
+      const index = test?.index || 'Chưa rõ';
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: process.env.EMAIL_TO,
-      subject: '📨 Bài viết mới từ học sinh',
+      subject: `📨 Bài viết mới từ học sinh ${user.name} (Đề số ${index})`,
       html: `
-        <h2>Task 1</h2>
-        <p>${task1.replace(/\n/g, '<br>')}</p>
-        <h2>Task 2</h2>
-        <p>${task2.replace(/\n/g, '<br>')}</p>
-        <p><b>Thời gian còn lại:</b> ${Math.floor(timeLeft / 60)} phút ${timeLeft % 60} giây</p>
-      `,
+        <p><strong>👤 Học sinh:</strong> ${user.name}</p>
+    <p><strong>📞 Số điện thoại:</strong> ${user.phone}</p>
+    <p><strong>📝 Đề số:</strong> ${index}</p>
+    <h2>Task 1</h2>
+    <p>${task1.replace(/\n/g, '<br>')}</p>
+    <h2>Task 2</h2>
+    <p>${task2.replace(/\n/g, '<br>')}</p>
+    <p><b>⏳ Thời gian còn lại:</b> ${Math.floor(timeLeft / 60)} phút ${timeLeft % 60} giây</p>
+  `,
     };
 
     await transporter.sendMail(mailOptions);

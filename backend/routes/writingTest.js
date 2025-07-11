@@ -17,8 +17,12 @@ router.post('/', upload.single('image'), async (req, res) => {
   try {
     const { task1, task2 } = req.body;
     const task1Image = req.file ? `/uploads/${req.file.filename}` : null;
+    const count = await WritingTest.countDocuments(); // ✅ Đếm số đề hiện có
 
-    const newTest = new WritingTest({ task1, task2, task1Image });
+    const newTest = new WritingTest({ 
+      index: count + 1, // ✅ Gán số thứ tự đề mới
+      task1, task2, task1Image 
+    });
     await newTest.save();
 
     res.json({ message: '✅ Tạo đề thành công!', test: newTest });
