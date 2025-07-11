@@ -1,3 +1,5 @@
+require('dotenv').config(); // dòng này phải ở rất gần đầu
+const nodemailer = require('nodemailer');
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -65,7 +67,33 @@ app.post('/api/writing/submit', async (req, res) => {
     const { task1, task2, timeLeft } = req.body;
     const newSubmission = new Submission({ task1, task2, timeLeft });
     await newSubmission.save();
-    res.json({ message: '✅ Bài viết đã được lưu' });
+
+    // Gửi email tới admin
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: process.env.EMAIL_TO,
+      subject: '📨 Bài viết mới từ học sinh',
+      html: `
+        <h2>Task 1</h2>
+        <p>${task1.replace(/\n/g, '<br>')}</p>
+        <h2>Task 2</h2>
+        <p>${task2.replace(/\n/g, '<br>')}</p>
+        <p><b>Thời gian còn lại:</b> ${Math.floor(timeLeft / 60)} phút ${timeLeft % 60} giây</p>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.json({ message: '✅ Bài viết đã được lưu và gửi email!' });
+
   } catch (err) {
     res.status(500).json({ message: '❌ Lỗi khi lưu bài viết' });
   }
