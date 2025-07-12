@@ -125,9 +125,31 @@ const WritingTest = () => {
       </div>
 
       {/* Nội dung */}
-      <Split sizes={[50, 50]} minSize={200} style={{ flex: 1, display: 'flex' }}>
+      <Split
+  sizes={[50, 50]}
+  minSize={200}
+  gutterSize={8}
+  direction="horizontal"
+  style={{
+    flexGrow: 1,
+    overflow: 'hidden',        // ✅ không để Split tràn
+    height: '100%',
+    display: 'flex',
+  }}
+>
+
         {/* Panel trái */}
-        <div style={{ padding: 20, overflowY: 'auto' }}>
+        {/* <div style={{ padding: 20, overflowY: 'auto' }}> */}
+        <div
+  style={{
+    height: '100vh',
+    overflow: 'hidden',         // ✅ chống tràn toàn trang
+    display: 'flex',
+    flexDirection: 'column',
+    fontFamily: 'sans-serif',
+  }}
+>
+
           {activeTask === 'task1' && (
             <>
               <h2>WRITING TASK 1</h2>
@@ -151,8 +173,8 @@ const WritingTest = () => {
         <div style={{ padding: 20 }}>
           <h3>Your Answer – {activeTask.toUpperCase()} ({countWords(activeTask === 'task1' ? task1 : task2)} từ)</h3>
           <textarea
-            rows={15}
-            style={{ width: '100%', padding: 10 }}
+            rows={25}
+            style={{ width: '100%', padding: '10', boxSizing: 'border-box', fontSize: '18px' , fontFamily: 'sans-serif' }}
             value={activeTask === 'task1' ? task1 : task2}
             onChange={e => {
               if (activeTask === 'task1') setTask1(e.target.value);
