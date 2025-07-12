@@ -9,7 +9,6 @@ const Login = () => {
 
   const navigate = useNavigate();
 
-  // ✅ Nếu đã đăng nhập → chuyển trang luôn
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('user'));
     if (user) {
@@ -17,101 +16,134 @@ const Login = () => {
     }
   }, [navigate]);
 
- const handleLogin = async () => {
-  if (!name.trim() || !phone.trim()) {
-    setMessage('❌ Vui lòng nhập đầy đủ họ tên và số điện thoại');
-    return;
-  }
-
-  try {
-    const res = await fetch('http://localhost:5000/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, phone, role })
-    });
-
-    const data = await res.json();
-    if (res.ok) {
-      setMessage('✅ Đăng nhập thành công!');
-      localStorage.setItem('user', JSON.stringify(data.user));
-
-      // ✅ Chuyển trang chắc chắn bằng reload
-    window.location.href = data.user.role === 'teacher' ? '/admin' : '/';
-    } else {
-      setMessage('❌ ' + data.message);
+  const handleLogin = async () => {
+    if (!name.trim() || !phone.trim()) {
+      setMessage('❌ Vui lòng nhập đầy đủ họ tên và số điện thoại');
+      return;
     }
-  } catch (err) {
-    setMessage('Lỗi kết nối server');
-  }
-    };
+
+    try {
+      const res = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, phone, role })
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setMessage('✅ Đăng nhập thành công!');
+        localStorage.setItem('user', JSON.stringify(data.user));
+        window.location.href = data.user.role === 'teacher' ? '/admin' : '/';
+      } else {
+        setMessage('❌ ' + data.message);
+      }
+    } catch (err) {
+      setMessage('Lỗi kết nối server');
+    }
+  };
+
   const handleRegister = async () => {
     if (!name.trim() || !phone.trim()) {
       setMessage('❌ Vui lòng nhập đầy đủ họ tên và số điện thoại');
       return;
     }
-  
+
     try {
       const res = await fetch('http://localhost:5000/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, phone, role }) // role mặc định là student
+        body: JSON.stringify({ name, phone, role })
       });
-  
+
       const data = await res.json();
       if (res.ok) {
         localStorage.setItem('user', JSON.stringify(data.user));
         setMessage('✅ Đăng ký thành công!');
-        window.location.href = '/'; 
+        window.location.href = '/';
       } else {
         setMessage('❌ ' + data.message);
       }
     } catch (err) {
-        setMessage('Lỗi kết nối server');
+      setMessage('Lỗi kết nối server');
     }
-    };
+  };
 
-
-    // ✅ Hàm đăng nhập
   return (
-    <div style={{ maxWidth: '400px', margin: '50px auto' }}>
-      <h2>Đăng nhập StarEdu</h2>
+    <div style={{
+      height: '100vh',
+      background: '#f0f4ff',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontFamily: 'Segoe UI, sans-serif'
+    }}>
+      <div style={{
+        background: '#fff',
+        padding: '30px',
+        borderRadius: '12px',
+        boxShadow: '0 0 20px rgba(0,0,0,0.1)',
+        width: '100%',
+        maxWidth: '360px',
+        textAlign: 'center'
+      }}>
+        <h2 style={{ marginBottom: 20, fontWeight: 600 }}>Đăng nhập StarEdu</h2>
 
-      <input
-        type="text"
-        placeholder="Họ tên"
-        value={name}
-        onChange={e => setName(e.target.value)}
-        style={{ width: '100%', marginBottom: '10px' }}
-      />
+        <input
+          type="text"
+          placeholder="Họ tên"
+          value={name}
+          onChange={e => setName(e.target.value)}
+          style={inputStyle}
+        />
+        <input
+          type="text"
+          placeholder="Số điện thoại"
+          value={phone}
+          onChange={e => setPhone(e.target.value)}
+          style={inputStyle}
+        />
 
-      <input
-        type="text"
-        placeholder="Số điện thoại"
-        value={phone}
-        onChange={e => setPhone(e.target.value)}
-        style={{ width: '100%', marginBottom: '10px' }}
-      />
+        <select value={role} onChange={e => setRole(e.target.value)} style={inputStyle}>
+          <option value="student">🎓 Học sinh</option>
+          <option value="teacher">👩‍🏫 Giáo viên</option>
+        </select>
 
-      <select
-        value={role}
-        onChange={e => setRole(e.target.value)}
-        style={{ width: '100%', marginBottom: '10px' }}
-      >
-        <option value="student">🎓 Học sinh</option>
-        <option value="teacher">👩‍🏫 Giáo viên</option>
-      </select>
+        <button onClick={handleLogin} style={loginBtn}>Đăng nhập</button>
 
-      <button onClick={handleLogin} style={{ width: '100%' }}>
-        Đăng nhập
-      </button>
+        <p style={{ color: '#d00', margin: '10px 0' }}>{message}</p>
 
-      <p style={{ marginTop: '10px' }}>{message}</p>
-      <button onClick={handleRegister} style={{ width: '100%', marginTop: '10px', backgroundColor: '#4CAF50', color: 'white' }}>
-        Đăng ký
-        </button>
-
+        <button onClick={handleRegister} style={registerBtn}>Đăng ký</button>
+      </div>
     </div>
   );
+};
+
+const inputStyle = {
+  width: '100%',
+  padding: '10px 0px',
+  margin: '8px 0',
+  borderRadius: '6px',
+  border: '1px solid #ccc',
+  fontSize: '16px'
+};
+
+const loginBtn = {
+  width: '100%',
+  backgroundColor: '#0e276f',
+  color: 'white',
+  padding: '10px',
+  border: 'none',
+  borderRadius: '6px',
+  fontWeight: 'bold',
+  fontSize: '16px',
+  cursor: 'pointer',
+  marginTop: '10px'
+};
+
+const registerBtn = {
+  ...loginBtn,
+  backgroundColor: '#008170',
+  marginTop: '10px'
 };
 
 export default Login;
