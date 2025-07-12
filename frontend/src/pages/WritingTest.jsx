@@ -17,11 +17,7 @@ const WritingTest = () => {
   const user = JSON.parse(localStorage.getItem('user'));
   const selectedTestId = localStorage.getItem('selectedTestId');
 
-  // Nếu chưa chọn đề
-  // if (!selectedTestId) {
-  //   return <div style={{ padding: 50 }}>⚠️ Bạn chưa chọn đề thi. Quay lại trang chọn đề.</div>;
-  // }
-
+  
   // 🧠 Tự động lưu vào localStorage mỗi lần thay đổi
   useEffect(() => {
     localStorage.setItem('writing_task1', task1);
@@ -184,17 +180,64 @@ const WritingTest = () => {
         </div>
       </Split>
 
+      
       {/* Footer */}
-      <div style={{
-        display: 'flex', justifyContent: 'center', padding: 10,
-        background: '#fafafa', borderTop: '1px solid #ccc'
-      }}>
-        <button onClick={() => setActiveTask('task1')} style={{ margin: '0 10px' }}>Task 1</button>
-        <button onClick={() => setActiveTask('task2')} style={{ margin: '0 10px' }}>Task 2</button>
-        <button onClick={handleSubmit} style={{ margin: '0 10px', background: '#007e86', color: '#fff' }}>
+    <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        padding: 10,
+        background: '#fafafa',
+        borderTop: '1px solid #ccc'
+        }}>
+        <button
+          onClick={() => setActiveTask('task1')}
+          style={{
+            margin: '0 10px',
+            padding: '10px 20px',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '16px',
+            backgroundColor: activeTask === 'task1' ? '#007bff' : '#e0e0e0',
+            color: activeTask === 'task1' ? 'white' : '#333',
+            cursor: 'pointer'
+          }}
+        >
+          Task 1
+        </button>
+
+        <button
+          onClick={() => setActiveTask('task2')}
+          style={{
+            margin: '0 10px',
+            padding: '10px 20px',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '16px',
+            backgroundColor: activeTask === 'task2' ? '#007bff' : '#e0e0e0',
+            color: activeTask === 'task2' ? 'white' : '#333',
+            cursor: 'pointer'
+          }}
+        >
+          Task 2
+        </button>
+
+        <button
+          onClick={handleSubmit}
+          style={{
+            margin: '0 10px',
+            padding: '10px 20px',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '16px',
+            backgroundColor: '#28a745',
+            color: 'white',
+            cursor: 'pointer'
+          }}
+        >
           📩 Nộp bài
         </button>
-      </div>
+    </div>
+
     </div>
   );
 };
