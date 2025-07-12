@@ -86,33 +86,33 @@ const Login = () => {
         maxWidth: '360px',
         textAlign: 'center'
       }}>
-        <h2 style={{ marginBottom: 20, fontWeight: 600 }}>Đăng nhập StarEdu</h2>
+        <h2 style={{ marginBottom: 20, fontWeight: 600 }}>STAREDU - IX Writing's BRAD Teacher</h2>
 
         <input
           type="text"
-          placeholder="Họ tên"
+          placeholder=" Name"
           value={name}
           onChange={e => setName(e.target.value)}
           style={inputStyle}
         />
         <input
           type="text"
-          placeholder="Số điện thoại"
+          placeholder=" Phone Number"
           value={phone}
           onChange={e => setPhone(e.target.value)}
           style={inputStyle}
         />
 
         <select value={role} onChange={e => setRole(e.target.value)} style={inputStyle}>
-          <option value="student">🎓 Học sinh</option>
-          <option value="teacher">👩‍🏫 Giáo viên</option>
+          <option value="student">🎓 Student</option>
+          <option value="teacher">👩‍🏫 Teacher</option>
         </select>
 
-        <button onClick={handleLogin} style={loginBtn}>Đăng nhập</button>
+        <button onClick={handleLogin} style={loginBtn}>Login</button>
 
         <p style={{ color: '#d00', margin: '10px 0' }}>{message}</p>
 
-        <button onClick={handleRegister} style={registerBtn}>Đăng ký</button>
+        <button onClick={handleRegister} style={registerBtn}>Register</button>
       </div>
     </div>
   );

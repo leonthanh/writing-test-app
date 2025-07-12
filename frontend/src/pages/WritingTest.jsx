@@ -122,31 +122,31 @@ const WritingTest = () => {
 
       {/* Nội dung */}
       <Split
-  sizes={[50, 50]}
-  minSize={200}
-  gutterSize={8}
-  direction="horizontal"
-  style={{
-    flexGrow: 1,
-    overflow: 'hidden',        // ✅ không để Split tràn
-    height: '100%',
-    display: 'flex',
-  }}
->
+        sizes={[50, 50]}
+        minSize={200}
+        gutterSize={8}
+        direction="horizontal"
+        style={{
+          flexGrow: 1,
+          overflow: 'hidden',        // ✅ không để Split tràn
+          height: '100%',
+          display: 'flex',
+        }}
+      >
 
         {/* Panel trái */}
        
         <div
-  style={{
-    height: '100vh',
-    overflow: 'hidden',         // ✅ chống tràn toàn trang
-    display: 'flex',
-    flexDirection: 'column',
-    fontFamily: 'sans-serif',
-  }}
->
+          style={{
+          height: '100vh',
+          overflow: 'hidden',         // ✅ chống tràn toàn trang
+          display: 'flex',
+          flexDirection: 'column',
+          fontFamily: 'sans-serif',
+          }}
+        >
 
-          {activeTask === 'task1' && (
+        {activeTask === 'task1' && (
             <>
               <h2>WRITING TASK 1</h2>
               <p>{testData.task1}</p>
@@ -234,7 +234,7 @@ const WritingTest = () => {
             cursor: 'pointer'
           }}
         >
-          📩 Nộp bài
+          📩 Submit
         </button>
     </div>
 
