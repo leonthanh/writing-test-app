@@ -6,7 +6,7 @@ import Login from './pages/Login';
 import CreateWritingTest from './pages/CreateWritingTest';
 import SelectTest from './pages/SelectTest';
 import ProtectedRoute from './components/ProtectedRoute';
-
+import MyFeedback from './pages/MyFeedback';
 const isLoggedIn = () => {
   const user = localStorage.getItem('user');
   return !!user;
@@ -24,7 +24,7 @@ function App() {
         {/* ✅ Trang làm bài viết */}
         <Route path="/writing" element={isLoggedIn() ? <WritingTest /> : <Navigate to="/login" replace />} />
         <Route path="/writing-test" element={<WritingTest />} />
-
+        <Route path="/my-feedback" element={<MyFeedback />} />
         {/* ✅ Trang giáo viên tạo đề */}
         <Route path="/admin/create-writing" element={<CreateWritingTest />} />
 

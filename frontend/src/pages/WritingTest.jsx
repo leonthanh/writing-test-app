@@ -13,12 +13,12 @@ const WritingTest = () => {
   const [message, setMessage] = useState('');
   const [activeTask, setActiveTask] = useState('task1');
   const [testData, setTestData] = useState(null);
+  const [feedback, setFeedback] = useState('');
 
   const user = JSON.parse(localStorage.getItem('user'));
   const selectedTestId = localStorage.getItem('selectedTestId');
+  const API_URL = process.env.REACT_APP_API_URL;
 
-  
-  // 🧠 Tự động lưu vào localStorage mỗi lần thay đổi
   useEffect(() => {
     localStorage.setItem('writing_task1', task1);
   }, [task1]);
@@ -35,83 +35,42 @@ const WritingTest = () => {
     localStorage.setItem('writing_started', started.toString());
   }, [started]);
 
-  // 🔁 Lấy đề từ backend
   useEffect(() => {
-    fetch(`http://localhost:5000/api/writing-tests/${selectedTestId}`)
+    fetch(`${API_URL}/api/writing-tests/${selectedTestId}`)
       .then(res => res.json())
       .then(data => setTestData(data))
       .catch(err => console.error('Lỗi khi tải đề:', err));
-  }, [selectedTestId]);
+  }, [selectedTestId, API_URL]);
 
-  // 📨 Nộp bài
-  // const handleSubmit = useCallback(async () => {
-  //   setSubmitted(true);
+  const handleSubmit = useCallback(async () => {
+    setSubmitted(true);
 
-  //   // ✅ Xoá cache
-  //   localStorage.removeItem('writing_task1');
-  //   localStorage.removeItem('writing_task2');
-  //   localStorage.removeItem('writing_timeLeft');
-  //   localStorage.removeItem('writing_started');
+    try {
+      const res = await fetch(`${API_URL}/api/writing/submit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ task1, task2, timeLeft, user, testId: selectedTestId }),
+      });
 
-  //   const user = JSON.parse(localStorage.getItem('user'));
-  //   const selectedTestId = localStorage.getItem('selectedTestId');
+      const data = await res.json();
+      setMessage(data.message || '✅ Đã nộp bài!');
 
-  //   try {
-  //     const res = await fetch('http://localhost:5000/api/writing/submit', {
-  //       method: 'POST',
-  //       headers: { 'Content-Type': 'application/json' },
-  //       body: JSON.stringify({ task1, task2, timeLeft, user, testId: selectedTestId }),
-  //     });
-  //     const data = await res.json();
-  //     setMessage(data.message || 'Đã nộp bài!');
-  //     // ✅ Sau khi nộp xong → quay về trang login sau 3 giây
-  //     setTimeout(() => {
-  //     window.location.href = '/login';
-  //   }, 3000);
+      localStorage.removeItem('writing_task1');
+      localStorage.removeItem('writing_task2');
+      localStorage.removeItem('writing_timeLeft');
+      localStorage.removeItem('writing_started');
+      localStorage.removeItem('selectedTestId');
+      localStorage.removeItem('user');
 
-  //   } catch (err) {
-  //     console.error('Lỗi nộp bài:', err);
-  //     setMessage('Lỗi khi gửi bài.');
-  //   }
-  // }, [task1, task2, timeLeft]);
-const handleSubmit = useCallback(async () => {
-  setSubmitted(true);
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 3000);
+    } catch (err) {
+      console.error('Lỗi nộp bài:', err);
+      setMessage('❌ Lỗi khi gửi bài.');
+    }
+  }, [task1, task2, timeLeft, user, selectedTestId, API_URL]);
 
-  const user = JSON.parse(localStorage.getItem('user'));
-  const selectedTestId = localStorage.getItem('selectedTestId');
-
-  try {
-    const res = await fetch('http://localhost:5000/api/writing/submit', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ task1, task2, timeLeft, user, testId: selectedTestId }),
-    });
-
-    const data = await res.json();
-    setMessage(data.message || '✅ Đã nộp bài!');
-
-    // ✅ Xoá toàn bộ thông tin sau khi nộp bài
-    localStorage.removeItem('writing_task1');
-    localStorage.removeItem('writing_task2');
-    localStorage.removeItem('writing_timeLeft');
-    localStorage.removeItem('writing_started');
-    localStorage.removeItem('selectedTestId');
-    localStorage.removeItem('user');
-
-    // ✅ Tự động chuyển về trang login sau 3 giây
-    setTimeout(() => {
-      window.location.href = '/login';
-    }, 3000);
-
-  } catch (err) {
-    console.error('Lỗi nộp bài:', err);
-    setMessage('❌ Lỗi khi gửi bài.');
-  }
-}, [task1, task2, timeLeft]);
-
-
-
-  // ⏳ Đếm ngược
   useEffect(() => {
     if (!started || submitted) return;
     if (timeLeft <= 0) {
@@ -122,6 +81,19 @@ const handleSubmit = useCallback(async () => {
     return () => clearInterval(timer);
   }, [started, submitted, timeLeft, handleSubmit]);
 
+  // 🔄 Khi đã nộp => lấy bài mới nhất để xem nhận xét
+  useEffect(() => {
+    if (!user || !user.phone) return;
+
+    fetch(`${API_URL}/api/writing/list`)
+      .then(res => res.json())
+      .then(list => {
+        const last = list.find(item => item.user?.phone === user.phone);
+        if (last) setFeedback(last.feedback || '');
+      })
+      .catch(err => console.error('❌ Lỗi lấy feedback:', err));
+  }, [submitted, API_URL, user]);
+
   const formatTime = s => {
     const m = Math.floor(s / 60).toString().padStart(2, '0');
     const sec = (s % 60).toString().padStart(2, '0');
@@ -131,7 +103,20 @@ const handleSubmit = useCallback(async () => {
   const countWords = text => text.trim().split(/\s+/).filter(Boolean).length;
 
   if (!testData) return <div style={{ padding: 50 }}>⏳ Đang tải đề...</div>;
-  if (submitted) return <div style={{ padding: 50 }}>✅ Bài làm đã nộp. {message}</div>;
+
+  if (submitted) {
+    return (
+      <div style={{ padding: 50 }}>
+        ✅ Bài làm đã nộp. {message}
+        {feedback && (
+          <>
+            <h3 style={{ marginTop: 30 }}>🗒️ Nhận xét từ giáo viên:</h3>
+            <p style={{ whiteSpace: 'pre-line' }}>{feedback}</p>
+          </>
+        )}
+      </div>
+    );
+  }
 
   if (!started) {
     return (
@@ -145,7 +130,6 @@ const handleSubmit = useCallback(async () => {
 
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
-      {/* Header */}
       <div style={{ padding: 10, background: '#f0f0f0', borderBottom: '1px solid #ccc' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <div>
@@ -155,44 +139,27 @@ const handleSubmit = useCallback(async () => {
           <button onClick={() => {
             localStorage.removeItem('user');
             window.location.href = '/login';
-          }} style={{ background: '#f44', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: 4 }}>
+          }} style={{
+            background: '#f44', color: '#fff',
+            border: 'none', padding: '6px 12px', borderRadius: 4
+          }}>
             🔓 Đăng xuất
           </button>
         </div>
       </div>
 
-      {/* Nội dung */}
-      <Split
-        sizes={[50, 50]}
-        minSize={200}
-        gutterSize={8}
-        direction="horizontal"
-        style={{
-          flexGrow: 1,
-          overflow: 'hidden',        // ✅ không để Split tràn
-          height: '100%',
-          display: 'flex',
-        }}
-      >
-
-        {/* Panel trái */}
-       
-        <div
-          style={{
-          height: '100vh',
-          overflow: 'hidden',         // ✅ chống tràn toàn trang
-          display: 'flex',
-          flexDirection: 'column',
-          fontFamily: 'sans-serif',
-          }}
-        >
-
-        {activeTask === 'task1' && (
+      <Split sizes={[50, 50]} minSize={200} gutterSize={8} direction="horizontal"
+        style={{ flexGrow: 1, overflow: 'hidden', height: '100%', display: 'flex' }}>
+        <div style={{
+          height: '100vh', overflow: 'hidden',
+          display: 'flex', flexDirection: 'column', fontFamily: 'sans-serif'
+        }}>
+          {activeTask === 'task1' && (
             <>
               <h2>WRITING TASK 1</h2>
               <p>{testData.task1}</p>
               {testData.task1Image && (
-                <img src={`http://localhost:5000${testData.task1Image}`} alt="Task 1" style={{ maxWidth: '100%' }} />
+                <img src={`${API_URL}${testData.task1Image}`} alt="Task 1" style={{ maxWidth: '100%' }} />
               )}
               <p><i>Viết ít nhất 150 từ.</i></p>
             </>
@@ -206,12 +173,11 @@ const handleSubmit = useCallback(async () => {
           )}
         </div>
 
-        {/* Panel phải */}
         <div style={{ padding: 20 }}>
           <h3>Your Answer – {activeTask.toUpperCase()} ({countWords(activeTask === 'task1' ? task1 : task2)} từ)</h3>
           <textarea
             rows={25}
-            style={{ width: '100%', padding: '10', boxSizing: 'border-box', fontSize: '18px' , fontFamily: 'sans-serif' }}
+            style={{ width: '100%', padding: '10', boxSizing: 'border-box', fontSize: '18px', fontFamily: 'sans-serif' }}
             value={activeTask === 'task1' ? task1 : task2}
             onChange={e => {
               if (activeTask === 'task1') setTask1(e.target.value);
@@ -221,66 +187,33 @@ const handleSubmit = useCallback(async () => {
         </div>
       </Split>
 
-      
-      {/* Footer */}
-    <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        padding: 10,
-        background: '#fafafa',
-        borderTop: '1px solid #ccc'
+      <div style={{
+        display: 'flex', justifyContent: 'center', padding: 10,
+        background: '#fafafa', borderTop: '1px solid #ccc'
+      }}>
+        <button onClick={() => setActiveTask('task1')} style={taskBtnStyle(activeTask === 'task1')}>Task 1</button>
+        <button onClick={() => setActiveTask('task2')} style={taskBtnStyle(activeTask === 'task2')}>Task 2</button>
+        <button onClick={handleSubmit} style={{
+          margin: '0 10px', padding: '10px 20px', border: 'none',
+          borderRadius: '8px', fontSize: '16px', backgroundColor: '#28a745',
+          color: 'white', cursor: 'pointer'
         }}>
-        <button
-          onClick={() => setActiveTask('task1')}
-          style={{
-            margin: '0 10px',
-            padding: '10px 20px',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '16px',
-            backgroundColor: activeTask === 'task1' ? '#007bff' : '#e0e0e0',
-            color: activeTask === 'task1' ? 'white' : '#333',
-            cursor: 'pointer'
-          }}
-        >
-          Task 1
-        </button>
-
-        <button
-          onClick={() => setActiveTask('task2')}
-          style={{
-            margin: '0 10px',
-            padding: '10px 20px',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '16px',
-            backgroundColor: activeTask === 'task2' ? '#007bff' : '#e0e0e0',
-            color: activeTask === 'task2' ? 'white' : '#333',
-            cursor: 'pointer'
-          }}
-        >
-          Task 2
-        </button>
-
-        <button
-          onClick={handleSubmit}
-          style={{
-            margin: '0 10px',
-            padding: '10px 20px',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '16px',
-            backgroundColor: '#28a745',
-            color: 'white',
-            cursor: 'pointer'
-          }}
-        >
           📩 Submit
         </button>
-    </div>
-
+      </div>
     </div>
   );
 };
+
+const taskBtnStyle = (isActive) => ({
+  margin: '0 10px',
+  padding: '10px 20px',
+  border: 'none',
+  borderRadius: '8px',
+  fontSize: '16px',
+  backgroundColor: isActive ? '#007bff' : '#e0e0e0',
+  color: isActive ? 'white' : '#333',
+  cursor: 'pointer'
+});
 
 export default WritingTest;

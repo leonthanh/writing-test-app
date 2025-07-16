@@ -68,7 +68,7 @@ app.post('/api/writing/submit', async (req, res) => {
   try {
   
     const { task1, task2, timeLeft, user, testId } = req.body;
-    const newSubmission = new Submission({ task1, task2, timeLeft });
+    const newSubmission = new Submission({ task1, task2, timeLeft,user, testId });
     await newSubmission.save();
 
     // Gửi email tới admin
@@ -115,16 +115,29 @@ app.get('/api/writing/list', async (req, res) => {
     res.status(500).json({ message: 'Lỗi khi lấy danh sách bài viết' });
   }
 });
+// Nhận xét bài viết
+app.post('/api/writing/comment', async (req, res) => {
+  const { submissionId, feedback } = req.body;
 
-// const path = require('path');
+  if (!submissionId || !feedback) {
+    return res.status(400).json({ message: 'Thiếu submissionId hoặc feedback' });
+  }
 
-// ✅ Phục vụ file tĩnh từ thư mục frontend đã build (ví dụ public folder)
-// app.use(express.static(path.join(__dirname, 'public')));
+  try {
+    const submission = await Submission.findById(submissionId);
+    if (!submission) {
+      return res.status(404).json({ message: 'Không tìm thấy bài viết' });
+    }
 
-// ✅ Trả về index.html cho tất cả các route không phải API (SPA)
-// app.get('*', (req, res) => {
-//   res.sendFile(path.join(__dirname, 'public', 'index.html'));
-// });
+    submission.feedback = feedback;
+    await submission.save();
+
+    res.json({ message: '✅ Gửi nhận xét thành công' });
+  } catch (err) {
+    console.error('❌ Lỗi khi gửi nhận xét:', err);
+    res.status(500).json({ message: '❌ Lỗi server khi gửi nhận xét' });
+  }
+});
 
 
 app.listen(5000, () => console.log('🚀 Server running at http://localhost:5000'));

@@ -4,13 +4,14 @@ import { useNavigate } from 'react-router-dom';
 const SelectTest = () => {
   const [tests, setTests] = useState([]);
   const navigate = useNavigate();
+  const API_URL = process.env.REACT_APP_API_URL; // ✅ Dùng biến môi trường
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/writing-tests')
+    fetch(`${API_URL}/api/writing-tests`)
       .then(res => res.json())
       .then(data => setTests(data))
       .catch(err => console.error('Lỗi khi tải đề:', err));
-  }, []);
+  }, [API_URL]);
 
   const handleSelect = (testId) => {
     localStorage.setItem('selectedTestId', testId);
@@ -37,10 +38,9 @@ const SelectTest = () => {
       }}>
         
         <div style={{ textAlign: 'center', marginBottom: 30 }}>
-          <img src="http://localhost:5000/uploads/staredu.jpg" alt="StarEdu" style={{ height: 60, marginBottom: 10 }} />
+          <img src={`${API_URL}/uploads/staredu.jpg`} alt="StarEdu" style={{ height: 60, marginBottom: 10 }} />
           <h2 style={{ margin: 0 }}>📋 IX Writing's BRAD Teacher</h2>
         </div>
-
 
         {tests.length === 0 ? (
           <p style={{ textAlign: 'center', fontStyle: 'italic', color: '#666' }}>⏳ Đang tải đề...</p>
@@ -53,7 +53,6 @@ const SelectTest = () => {
               marginBottom: '15px',
               backgroundColor: '#f9f9f9'
             }}>
-              
               <button
                 onClick={() => handleSelect(test._id)}
                 style={{
@@ -68,12 +67,17 @@ const SelectTest = () => {
                 }}
               >
                 <h3 style={{ margin: '0px' }}>
-                📝 Writing {test.index || index + 1}
-              </h3>
+                  📝 Writing {test.index || index + 1}
+                </h3>
               </button>
+              
+
             </div>
           ))
         )}
+        <button onClick={() => window.location.href = '/my-feedback'}>
+  📄 Xem nhận xét
+</button>
       </div>
     </div>
   );

@@ -4,12 +4,14 @@ import { useNavigate } from 'react-router-dom';
 const SelectWritingTest = () => {
   const [tests, setTests] = useState([]);
   const navigate = useNavigate();
+  const API_URL = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/writing-tests')
+    fetch(`${API_URL}/api/writing-tests`)
       .then(res => res.json())
-      .then(data => setTests(data));
-  }, []);
+      .then(data => setTests(data))
+      .catch(err => console.error('Lỗi khi tải đề:', err));
+  }, [API_URL]);
 
   const handleSelect = (id) => {
     localStorage.setItem('selectedTestId', id);
@@ -20,9 +22,9 @@ const SelectWritingTest = () => {
     <div style={{ padding: '50px' }}>
       <h2>Chọn đề viết</h2>
       {tests.map(test => (
-        <div key={test.id} style={{ marginBottom: '20px' }}>
-          <strong>{test.name}</strong>
-          <button onClick={() => handleSelect(test.id)} style={{ marginLeft: '10px' }}>
+        <div key={test._id} style={{ marginBottom: '20px' }}>
+          <strong>Đề số {test.index}</strong>
+          <button onClick={() => handleSelect(test._id)} style={{ marginLeft: '10px' }}>
             Làm bài
           </button>
         </div>

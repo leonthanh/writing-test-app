@@ -8,6 +8,7 @@ const Login = () => {
   const [message, setMessage] = useState('');
 
   const navigate = useNavigate();
+  const API_URL = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('user'));
@@ -23,7 +24,7 @@ const Login = () => {
     }
 
     try {
-      const res = await fetch('http://localhost:5000/api/auth/login', {
+      const res = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, phone, role })
@@ -31,8 +32,8 @@ const Login = () => {
 
       const data = await res.json();
       if (res.ok) {
-        setMessage('✅ Đăng nhập thành công!');
         localStorage.setItem('user', JSON.stringify(data.user));
+        setMessage('✅ Đăng nhập thành công!');
         window.location.href = data.user.role === 'teacher' ? '/admin' : '/';
       } else {
         setMessage('❌ ' + data.message);
@@ -49,7 +50,7 @@ const Login = () => {
     }
 
     try {
-      const res = await fetch('http://localhost:5000/api/auth/register', {
+      const res = await fetch(`${API_URL}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, phone, role })
@@ -86,7 +87,9 @@ const Login = () => {
         maxWidth: '360px',
         textAlign: 'center'
       }}>
-        <h2 style={{ marginBottom: 20, fontWeight: 600 }}>STAREDU - IX Writing's BRAD Teacher</h2>
+        <h2 style={{ marginBottom: 20, fontWeight: 600 }}>
+          STAREDU - IX Writing's BRAD Teacher
+        </h2>
 
         <input
           type="text"
