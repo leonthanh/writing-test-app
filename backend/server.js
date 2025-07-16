@@ -116,4 +116,15 @@ app.get('/api/writing/list', async (req, res) => {
   }
 });
 
+// const path = require('path');
+
+// ✅ Phục vụ file tĩnh từ thư mục frontend đã build (ví dụ public folder)
+// app.use(express.static(path.join(__dirname, 'public')));
+
+// ✅ Trả về index.html cho tất cả các route không phải API (SPA)
+// app.get('*', (req, res) => {
+//   res.sendFile(path.join(__dirname, 'public', 'index.html'));
+// });
+
+
 app.listen(5000, () => console.log('🚀 Server running at http://localhost:5000'));

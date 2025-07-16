@@ -44,31 +44,72 @@ const WritingTest = () => {
   }, [selectedTestId]);
 
   // 📨 Nộp bài
-  const handleSubmit = useCallback(async () => {
-    setSubmitted(true);
+  // const handleSubmit = useCallback(async () => {
+  //   setSubmitted(true);
 
-    // ✅ Xoá cache
+  //   // ✅ Xoá cache
+  //   localStorage.removeItem('writing_task1');
+  //   localStorage.removeItem('writing_task2');
+  //   localStorage.removeItem('writing_timeLeft');
+  //   localStorage.removeItem('writing_started');
+
+  //   const user = JSON.parse(localStorage.getItem('user'));
+  //   const selectedTestId = localStorage.getItem('selectedTestId');
+
+  //   try {
+  //     const res = await fetch('http://localhost:5000/api/writing/submit', {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify({ task1, task2, timeLeft, user, testId: selectedTestId }),
+  //     });
+  //     const data = await res.json();
+  //     setMessage(data.message || 'Đã nộp bài!');
+  //     // ✅ Sau khi nộp xong → quay về trang login sau 3 giây
+  //     setTimeout(() => {
+  //     window.location.href = '/login';
+  //   }, 3000);
+
+  //   } catch (err) {
+  //     console.error('Lỗi nộp bài:', err);
+  //     setMessage('Lỗi khi gửi bài.');
+  //   }
+  // }, [task1, task2, timeLeft]);
+const handleSubmit = useCallback(async () => {
+  setSubmitted(true);
+
+  const user = JSON.parse(localStorage.getItem('user'));
+  const selectedTestId = localStorage.getItem('selectedTestId');
+
+  try {
+    const res = await fetch('http://localhost:5000/api/writing/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ task1, task2, timeLeft, user, testId: selectedTestId }),
+    });
+
+    const data = await res.json();
+    setMessage(data.message || '✅ Đã nộp bài!');
+
+    // ✅ Xoá toàn bộ thông tin sau khi nộp bài
     localStorage.removeItem('writing_task1');
     localStorage.removeItem('writing_task2');
     localStorage.removeItem('writing_timeLeft');
     localStorage.removeItem('writing_started');
+    localStorage.removeItem('selectedTestId');
+    localStorage.removeItem('user');
 
-    const user = JSON.parse(localStorage.getItem('user'));
-    const selectedTestId = localStorage.getItem('selectedTestId');
+    // ✅ Tự động chuyển về trang login sau 3 giây
+    setTimeout(() => {
+      window.location.href = '/login';
+    }, 3000);
 
-    try {
-      const res = await fetch('http://localhost:5000/api/writing/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ task1, task2, timeLeft, user, testId: selectedTestId }),
-      });
-      const data = await res.json();
-      setMessage(data.message || 'Đã nộp bài!');
-    } catch (err) {
-      console.error('Lỗi nộp bài:', err);
-      setMessage('Lỗi khi gửi bài.');
-    }
-  }, [task1, task2, timeLeft]);
+  } catch (err) {
+    console.error('Lỗi nộp bài:', err);
+    setMessage('❌ Lỗi khi gửi bài.');
+  }
+}, [task1, task2, timeLeft]);
+
+
 
   // ⏳ Đếm ngược
   useEffect(() => {
