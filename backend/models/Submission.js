@@ -6,11 +6,14 @@ const SubmissionSchema = new mongoose.Schema({
   timeLeft: Number,
   submittedAt: { type: Date, default: Date.now },
   user: {
-  name: String,
-  phone: String
-},
-feedback: String // Nhận xét của giáo viên
-
+    name: String,
+    phone: String
+  },
+  testId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'WritingTest'
+  },
+  feedback: String // Nhận xét của giáo viên
 });
 
 module.exports = mongoose.model('Submission', SubmissionSchema);

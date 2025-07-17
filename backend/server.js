@@ -109,7 +109,9 @@ app.post('/api/writing/submit', async (req, res) => {
 // Lấy danh sách bài viết
 app.get('/api/writing/list', async (req, res) => {
   try {
-    const submissions = await Submission.find().sort({ submittedAt: -1 });
+    const submissions = await Submission.find()
+    .sort({ submittedAt: -1 })
+    .populate('testId', 'index task1 task2 task1Image'); // Thêm populate để lấy thông tin đề thi
     res.json(submissions);
   } catch (err) {
     res.status(500).json({ message: 'Lỗi khi lấy danh sách bài viết' });
