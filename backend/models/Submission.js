@@ -13,7 +13,9 @@ const SubmissionSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'WritingTest'
   },
-  feedback: String // Nhận xét của giáo viên
+  feedback: String,
+  feedbackBy: String,
+  feedbackAt: Date // Nhận xét của giáo viên
 });
 
 module.exports = mongoose.model('Submission', SubmissionSchema);

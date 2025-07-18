@@ -110,19 +110,41 @@ app.post('/api/writing/submit', async (req, res) => {
 app.get('/api/writing/list', async (req, res) => {
   try {
     const submissions = await Submission.find()
-    .sort({ submittedAt: -1 })
-    .populate('testId', 'index task1 task2 task1Image'); // Thêm populate để lấy thông tin đề thi
+    .populate('testId', 'index task1 task2 task1Image') // Thêm populate để lấy thông tin đề thi
+    .sort({ submittedAt: -1 });
     res.json(submissions);
   } catch (err) {
     res.status(500).json({ message: 'Lỗi khi lấy danh sách bài viết' });
   }
 });
 // Nhận xét bài viết
-app.post('/api/writing/comment', async (req, res) => {
-  const { submissionId, feedback } = req.body;
+// app.post('/api/writing/comment', async (req, res) => {
+//   const { submissionId, feedback } = req.body;
 
-  if (!submissionId || !feedback) {
-    return res.status(400).json({ message: 'Thiếu submissionId hoặc feedback' });
+//   if (!submissionId || !feedback) {
+//     return res.status(400).json({ message: 'Thiếu submissionId hoặc feedback' });
+//   }
+
+//   try {
+//     const submission = await Submission.findById(submissionId);
+//     if (!submission) {
+//       return res.status(404).json({ message: 'Không tìm thấy bài viết' });
+//     }
+
+//     submission.feedback = feedback;
+//     await submission.save();
+
+//     res.json({ message: '✅ Gửi nhận xét thành công' });
+//   } catch (err) {
+//     console.error('❌ Lỗi khi gửi nhận xét:', err);
+//     res.status(500).json({ message: '❌ Lỗi server khi gửi nhận xét' });
+//   }
+// });
+app.post('/api/writing/comment', async (req, res) => {
+  const { submissionId, feedback, teacherName } = req.body;
+
+  if (!submissionId || !feedback || !teacherName) {
+    return res.status(400).json({ message: 'Thiếu thông tin gửi nhận xét.' });
   }
 
   try {
@@ -132,6 +154,8 @@ app.post('/api/writing/comment', async (req, res) => {
     }
 
     submission.feedback = feedback;
+    submission.feedbackBy = teacherName;
+    submission.feedbackAt = new Date();
     await submission.save();
 
     res.json({ message: '✅ Gửi nhận xét thành công' });

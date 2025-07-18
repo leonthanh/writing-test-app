@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import StudentNavbar from '../components/StudentNavbar';
 
 const SelectTest = () => {
   const [tests, setTests] = useState([]);
@@ -19,6 +20,9 @@ const SelectTest = () => {
   };
 
   return (
+
+    <>
+    <StudentNavbar />
     <div style={{
       display: 'flex',
       flexDirection: 'column',
@@ -80,6 +84,7 @@ const SelectTest = () => {
 </button>
       </div>
     </div>
+    </>
   );
 };
 

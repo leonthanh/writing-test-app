@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import StudentNavbar from '../components/StudentNavbar';
 
 const MyFeedback = () => {
   const [submissions, setSubmissions] = useState([]);
@@ -12,22 +13,12 @@ const MyFeedback = () => {
 
     const fetchData = async () => {
       try {
-        const [subRes, testRes] = await Promise.all([
-          fetch(`${API_URL}/api/writing/list`).then(res => res.json()),
-          fetch(`${API_URL}/api/writing-tests`).then(res => res.json())
-        ]);
-
-        const userSubs = subRes.filter(sub => sub.user?.phone === user.phone);
-
-        // Gắn đề tương ứng vào submission
-        const merged = userSubs.map(sub => {
-          const test = testRes.find(t => t._id.toString() === sub.testId?.toString());
-          return { ...sub, test };
-        });
-
-        setSubmissions(merged);
+        const res = await fetch(`${API_URL}/api/writing/list`);
+        const allSubs = await res.json();
+        const userSubs = allSubs.filter(sub => sub.user?.phone === user.phone);
+        setSubmissions(userSubs);
       } catch (err) {
-        console.error('❌ Lỗi khi tải bài viết hoặc đề thi:', err);
+        console.error('❌ Lỗi khi tải bài viết:', err);
       } finally {
         setLoading(false);
       }
@@ -39,8 +30,10 @@ const MyFeedback = () => {
   if (!user) return <p style={{ padding: 40 }}>❌ Bạn chưa đăng nhập.</p>;
 
   return (
-    <div style={{ padding: '30px' }}>
-      <button
+    <>
+    <StudentNavbar />
+     <div style={{ padding: '30px' }}>
+      {/* <button
         onClick={() => {
           localStorage.removeItem('user');
           window.location.href = '/login';
@@ -48,7 +41,7 @@ const MyFeedback = () => {
         style={{ position: 'absolute', top: 10, right: 10 }}
       >
         🔓 Đăng xuất
-      </button>
+      </button> */}
 
       <h2>📝 Bài viết & Nhận xét</h2>
       {loading && <p>⏳ Đang tải dữ liệu...</p>}
@@ -62,19 +55,7 @@ const MyFeedback = () => {
           marginBottom: '20px',
           backgroundColor: '#f9f9f9'
         }}>
-          <p><strong>🧾 Mã đề:</strong> Writing {sub.test?.index || '(Không xác định)'}</p>
-
-          <h4 style={{ marginTop: 10 }}>📄 Đề Task 1:</h4>
-          <p>{sub.test?.task1 || <i>Không có đề Task 1</i>}</p>
-
-          {sub.test?.task1Image && (
-            <img src={`${API_URL}${sub.test.task1Image}`} alt="Task 1" style={{ maxWidth: '100%', marginBottom: 10 }} />
-          )}
-
-          <h4>📄 Đề Task 2:</h4>
-          <p>{sub.test?.task2 || <i>Không có đề Task 2</i>}</p>
-
-          <hr />
+          <p><strong>🧾 Mã đề:</strong> Writing {sub.testId?.index || '(Không xác định)'}</p>
 
           <p><strong>🕒 Thời gian nộp:</strong> {new Date(sub.submittedAt).toLocaleString()}</p>
           <p><strong>⏳ Thời gian còn lại:</strong> {Math.floor(sub.timeLeft / 60)} phút</p>
@@ -94,6 +75,8 @@ const MyFeedback = () => {
         </div>
       ))}
     </div>
+  </>
+   
   );
 };
 
