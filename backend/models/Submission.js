@@ -14,8 +14,14 @@ const SubmissionSchema = new mongoose.Schema({
     ref: 'WritingTest'
   },
   feedback: String,
+  teacherName: String,
   feedbackBy: String,
-  feedbackAt: Date // Nhận xét của giáo viên
+  feedbackAt: Date,
+  feedbackSeen: {
+  type: Boolean,
+  default: false,
+}
+ // Nhận xét của giáo viên
 });
 
 module.exports = mongoose.model('Submission', SubmissionSchema);

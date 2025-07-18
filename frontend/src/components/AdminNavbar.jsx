@@ -35,7 +35,7 @@ const AdminNavbar = () => {
       boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
     }}>
       <div style={{ display: 'flex', alignItems: 'center' }}>
-        <Link to="/admin" style={linkStyle}>📄 Bài viết</Link>
+        <Link to="/admin" style={navItemHover}>📄 Bài viết</Link>
         <Link to="/admin/create-writing" style={linkStyle}>✏️ Tạo đề</Link>
         <Link to="/review" style={linkStyle}>📝 Nhận xét bài</Link>
       </div>

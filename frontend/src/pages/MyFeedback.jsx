@@ -17,6 +17,19 @@ const MyFeedback = () => {
         const allSubs = await res.json();
         const userSubs = allSubs.filter(sub => sub.user?.phone === user.phone);
         setSubmissions(userSubs);
+
+        // ✅ Gửi yêu cầu set feedbackSeen: true
+      const seenIds = userSubs
+        .filter(sub => sub.feedback && !sub.feedbackSeen)
+        .map(sub => sub._id);
+
+      if (seenIds.length > 0) {
+        await fetch(`${API_URL}/api/writing/mark-feedback-seen`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ids: seenIds })
+        });
+      }
       } catch (err) {
         console.error('❌ Lỗi khi tải bài viết:', err);
       } finally {
@@ -26,6 +39,7 @@ const MyFeedback = () => {
 
     fetchData();
   }, [user, API_URL]);
+
 
   if (!user) return <p style={{ padding: 40 }}>❌ Bạn chưa đăng nhập.</p>;
 
