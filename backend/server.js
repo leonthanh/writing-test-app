@@ -142,7 +142,7 @@ app.get('/api/writing/list', async (req, res) => {
 // });
 app.post('/api/writing/comment', async (req, res) => {
   const { submissionId, feedback, teacherName } = req.body;
-
+  
   if (!submissionId || !feedback || !teacherName) {
     return res.status(400).json({ message: 'Thiếu thông tin gửi nhận xét.' });
   }
