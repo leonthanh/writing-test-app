@@ -6,9 +6,10 @@ const StudentNavbar = () => {
   const user = JSON.parse(localStorage.getItem('user'));
   const API_URL = process.env.REACT_APP_API_URL;
 
-  const [notificationCount, setNotificationCount] = useState(0);
+  const [feedbackCount, setFeedbackCount] = useState(0);
+  const [newTestCount, setNewTestCount] = useState(0);
 
-  // 🔔 Kiểm tra số thông báo mới
+  // Gọi API để lấy thông báo
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
@@ -18,15 +19,14 @@ const StudentNavbar = () => {
         ]);
 
         const userSubs = submissionsRes.filter(sub => sub.user?.phone === user?.phone);
-        const hasNewFeedback = userSubs.some(sub => sub.feedback && !sub.feedbackSeen);
-        const totalNewTests = testsRes.length;
+        const unseenFeedbacks = userSubs.filter(sub => sub.feedback && !sub.feedbackSeen);
+setFeedbackCount(unseenFeedbacks.length);
 
-        // Ví dụ: 1 thông báo cho feedback mới, 1 cho đề mới (bạn có thể tùy chỉnh logic đếm)
-        let count = 0;
-        if (hasNewFeedback) count += 1;
-        if (totalNewTests > 0) count += 1;
+// Tính số đề chưa làm
+const submittedTestIds = userSubs.map(sub => sub.testId?.toString());
+const unsubmittedTests = testsRes.filter(test => !submittedTestIds.includes(test._id?.toString()));
+setNewTestCount(unsubmittedTests.length);
 
-        setNotificationCount(count);
       } catch (err) {
         console.error('❌ Lỗi khi tải thông báo:', err);
       }
@@ -34,6 +34,25 @@ const StudentNavbar = () => {
 
     if (user) fetchNotifications();
   }, [user, API_URL]);
+
+  // Gọi API đánh dấu đã xem nhận xét
+  const markFeedbackAsSeen = async () => {
+    try {
+      await fetch(`${API_URL}/api/writing/mark-feedback-seen`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: user.phone })
+      });
+    } catch (err) {
+      console.error('❌ Lỗi khi đánh dấu đã xem nhận xét:', err);
+    }
+  };
+
+  const handleNotificationClick = async () => {
+    await markFeedbackAsSeen();
+    navigate('/my-feedback');
+    window.location.reload(); // ép reload nếu đang ở cùng route
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('user');
@@ -49,6 +68,8 @@ const StudentNavbar = () => {
     fontWeight: 'bold',
     fontSize: '16px'
   };
+
+  const totalNotifications = feedbackCount + newTestCount;
 
   return (
     <nav style={{
@@ -67,23 +88,34 @@ const StudentNavbar = () => {
         <Link to="/my-feedback" style={navLinkStyle}>📄 Xem Nhận xét</Link>
 
         {/* 🔔 Icon chuông thông báo */}
-        <div style={{ position: 'relative', marginRight: '20px', cursor: 'pointer' }} onClick={() => navigate('/my-feedback')}>
-  🔔
-  {notificationCount > 0 && (
-    <span style={{
-      position: 'absolute',
-      top: -6,
-      right: -10,
-      background: 'red',
-      color: 'white',
-      borderRadius: '50%',
-      padding: '2px 6px',
-      fontSize: '12px'
-    }}>
-      {notificationCount}
-    </span>
-  )}
-</div>
+        <div
+          style={{
+            position: 'relative',
+            marginRight: '20px',
+            cursor: 'pointer',
+            fontSize: '20px',
+            animation: totalNotifications > 0 ? 'shake 0.5s infinite' : 'none'
+          }}
+          onClick={handleNotificationClick}
+          title="Thông báo mới"
+        >
+          🔔
+          {totalNotifications > 0 && (
+            <span style={{
+              position: 'absolute',
+              top: -6,
+              right: -10,
+              background: 'red',
+              color: 'white',
+              borderRadius: '50%',
+              padding: '2px 6px',
+              fontSize: '12px',
+              fontWeight: 'bold'
+            }}>
+              {totalNotifications}
+            </span>
+          )}
+        </div>
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -106,6 +138,19 @@ const StudentNavbar = () => {
           🔓 Đăng xuất
         </button>
       </div>
+
+      {/* CSS animation cho chuông */}
+      <style>
+        {`
+          @keyframes shake {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(10deg); }
+            50% { transform: rotate(-10deg); }
+            75% { transform: rotate(10deg); }
+            100% { transform: rotate(0deg); }
+          }
+        `}
+      </style>
     </nav>
   );
 };

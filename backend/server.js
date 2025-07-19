@@ -164,6 +164,28 @@ app.post('/api/writing/comment', async (req, res) => {
     res.status(500).json({ message: '❌ Lỗi server khi gửi nhận xét' });
   }
 });
+app.post('/api/writing/mark-feedback-seen', async (req, res) => {
+  const { phone } = req.body;
+
+  if (!phone) {
+    return res.status(400).json({ message: 'Thiếu số điện thoại học sinh.' });
+  }
+
+  try {
+    const result = await Submission.updateMany(
+      { 'user.phone': phone, feedback: { $exists: true }, feedbackSeen: { $ne: true } },
+      { $set: { feedbackSeen: true } }
+    );
+
+    res.json({
+      message: '✅ Đã đánh dấu nhận xét là đã xem.',
+      updatedCount: result.modifiedCount
+    });
+  } catch (err) {
+    console.error('❌ Lỗi khi cập nhật trạng thái nhận xét:', err);
+    res.status(500).json({ message: '❌ Lỗi server khi cập nhật nhận xét.' });
+  }
+});
 
 
 app.listen(5000, () => console.log('🚀 Server running at http://localhost:5000'));
