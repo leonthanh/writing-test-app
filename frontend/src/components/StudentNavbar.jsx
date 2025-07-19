@@ -45,11 +45,15 @@ const StudentNavbar = () => {
     }
   };
 
-  const handleNotificationClick = async () => {
-    await markFeedbackAsSeen();
-    await fetchNotifications(); // cập nhật lại số thông báo
+  
+const handleNotificationClick = async () => {
+  await markFeedbackAsSeen();
+  setTimeout(() => {
+    fetchNotifications(); // cập nhật lại số thông báo sau khi backend xử lý xong
     navigate('/my-feedback');
-  };
+  }, 300); // chờ 300ms
+};
+
 
   const handleLogout = () => {
     localStorage.removeItem('user');

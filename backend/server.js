@@ -68,7 +68,7 @@ app.post('/api/writing/submit', async (req, res) => {
   try {
   
     const { task1, task2, timeLeft, user, testId } = req.body;
-    const newSubmission = new Submission({ task1, task2, timeLeft,user, testId });
+    const newSubmission = new Submission({ task1, task2, timeLeft,user, testId, feedbackSeen: false });
     await newSubmission.save();
 
     // Gửi email tới admin
