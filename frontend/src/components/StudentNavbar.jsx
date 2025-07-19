@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 const StudentNavbar = () => {
@@ -9,33 +9,30 @@ const StudentNavbar = () => {
   const [feedbackCount, setFeedbackCount] = useState(0);
   const [newTestCount, setNewTestCount] = useState(0);
 
-  // Gọi API để lấy thông báo
+  // ✅ Dùng useCallback để ổn định hàm và tránh cảnh báo ESLint
+  const fetchNotifications = useCallback(async () => {
+    try {
+      const [testsRes, submissionsRes] = await Promise.all([
+        fetch(`${API_URL}/api/writing-tests`).then(res => res.json()),
+        fetch(`${API_URL}/api/writing/list`).then(res => res.json()),
+      ]);
+
+      const userSubs = submissionsRes.filter(sub => sub.user?.phone === user?.phone);
+      const unseenFeedbacks = userSubs.filter(sub => sub.feedback && !sub.feedbackSeen);
+      setFeedbackCount(unseenFeedbacks.length);
+
+      const submittedTestIds = userSubs.map(sub => sub.testId?.toString());
+      const unsubmittedTests = testsRes.filter(test => !submittedTestIds.includes(test._id?.toString()));
+      setNewTestCount(unsubmittedTests.length);
+    } catch (err) {
+      console.error('❌ Lỗi khi tải thông báo:', err);
+    }
+  }, [API_URL, user]);
+
   useEffect(() => {
-    const fetchNotifications = async () => {
-      try {
-        const [testsRes, submissionsRes] = await Promise.all([
-          fetch(`${API_URL}/api/writing-tests`).then(res => res.json()),
-          fetch(`${API_URL}/api/writing/list`).then(res => res.json()),
-        ]);
-
-        const userSubs = submissionsRes.filter(sub => sub.user?.phone === user?.phone);
-        const unseenFeedbacks = userSubs.filter(sub => sub.feedback && !sub.feedbackSeen);
-setFeedbackCount(unseenFeedbacks.length);
-
-// Tính số đề chưa làm
-const submittedTestIds = userSubs.map(sub => sub.testId?.toString());
-const unsubmittedTests = testsRes.filter(test => !submittedTestIds.includes(test._id?.toString()));
-setNewTestCount(unsubmittedTests.length);
-
-      } catch (err) {
-        console.error('❌ Lỗi khi tải thông báo:', err);
-      }
-    };
-
     if (user) fetchNotifications();
-  }, [user, API_URL]);
+  }, [user, fetchNotifications]);
 
-  // Gọi API đánh dấu đã xem nhận xét
   const markFeedbackAsSeen = async () => {
     try {
       await fetch(`${API_URL}/api/writing/mark-feedback-seen`, {
@@ -50,8 +47,8 @@ setNewTestCount(unsubmittedTests.length);
 
   const handleNotificationClick = async () => {
     await markFeedbackAsSeen();
+    await fetchNotifications(); // cập nhật lại số thông báo
     navigate('/my-feedback');
-    window.location.reload(); // ép reload nếu đang ở cùng route
   };
 
   const handleLogout = () => {
