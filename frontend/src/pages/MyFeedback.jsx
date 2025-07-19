@@ -76,14 +76,27 @@ const MyFeedback = () => {
             <h4>✍️ Bài làm Task 2:</h4>
             <p style={{ whiteSpace: 'pre-line' }}>{sub.task2}</p>
 
-            <h4 style={{ marginTop: 20 }}>📩 Nhận xét từ giáo viên:</h4>
+            {/* <h4 style={{ marginTop: 20 }}>📩 Nhận xét từ giáo viên:</h4>
             {sub.feedback ? (
               <p style={{ background: '#e7f4e4', padding: 10, borderRadius: 6 }}>
                 {sub.feedback}
               </p>
             ) : (
               <p style={{ fontStyle: 'italic', color: '#999' }}>Chưa có nhận xét nào.</p>
-            )}
+            )} */}
+            <h4 style={{ marginTop: 20 }}>📩 Nhận xét từ giáo viên:</h4>
+{sub.feedback ? (
+  <div style={{ background: '#e7f4e4', padding: 10, borderRadius: 6 }}>
+    <p style={{ marginBottom: 8 }}>{sub.feedback}</p>
+    <p style={{ fontSize: '14px', color: '#555' }}>
+      👨‍🏫 <strong>Giáo viên:</strong> {sub.feedbackBy || 'Không rõ'}<br />
+      🕒 <strong>Thời gian nhận xét:</strong> {sub.feedbackAt ? new Date(sub.feedbackAt).toLocaleString() : 'Không rõ'}
+    </p>
+  </div>
+) : (
+  <p style={{ fontStyle: 'italic', color: '#999' }}>Chưa có nhận xét nào.</p>
+)}
+
           </div>
         ))}
       </div>

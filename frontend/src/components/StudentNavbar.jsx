@@ -10,24 +10,30 @@ const StudentNavbar = () => {
   const [newTestCount, setNewTestCount] = useState(0);
 
   // ✅ Dùng useCallback để ổn định hàm và tránh cảnh báo ESLint
-  const fetchNotifications = useCallback(async () => {
-    try {
-      const [testsRes, submissionsRes] = await Promise.all([
-        fetch(`${API_URL}/api/writing-tests`).then(res => res.json()),
-        fetch(`${API_URL}/api/writing/list`).then(res => res.json()),
-      ]);
+const fetchNotifications = useCallback(async () => {
+  try {
+    const [testsRes, submissionsRes] = await Promise.all([
+      fetch(`${API_URL}/api/writing-tests`).then(res => res.json()),
+      fetch(`${API_URL}/api/writing/list?phone=${user.phone}`).then(res => res.json()),
+    ]);
 
-      const userSubs = submissionsRes.filter(sub => sub.user?.phone === user?.phone);
-      const unseenFeedbacks = userSubs.filter(sub => sub.feedback && !sub.feedbackSeen);
-      setFeedbackCount(unseenFeedbacks.length);
+    // submissionsRes lúc này chỉ chứa bài viết của học sinh hiện tại
+    const unseenFeedbacks = submissionsRes.filter(sub => sub.feedback && sub.feedbackSeen !== true);
 
-      const submittedTestIds = userSubs.map(sub => sub.testId?.toString());
-      const unsubmittedTests = testsRes.filter(test => !submittedTestIds.includes(test._id?.toString()));
-      setNewTestCount(unsubmittedTests.length);
-    } catch (err) {
-      console.error('❌ Lỗi khi tải thông báo:', err);
-    }
-  }, [API_URL, user]);
+    const submittedTestIds = submissionsRes.map(sub => sub.testId?._id?.toString() || sub.testId?.toString());
+    const unsubmittedTests = testsRes.filter(test => !submittedTestIds.includes(test._id?.toString()));
+
+    setFeedbackCount(unseenFeedbacks.length);
+    setNewTestCount(unsubmittedTests.length);
+
+    // Debug log
+    console.log('📦 Nhận xét chưa xem:', unseenFeedbacks.length);
+    console.log('📦 Đề chưa nộp:', unsubmittedTests.length);
+  } catch (err) {
+    console.error('❌ Lỗi khi tải thông báo:', err);
+  }
+}, [API_URL, user]);
+
 
   useEffect(() => {
     if (user) fetchNotifications();
@@ -45,13 +51,15 @@ const StudentNavbar = () => {
     }
   };
 
-  
+
 const handleNotificationClick = async () => {
-  await markFeedbackAsSeen();
-  setTimeout(() => {
-    fetchNotifications(); // cập nhật lại số thông báo sau khi backend xử lý xong
+  try {
+    await markFeedbackAsSeen(); // đợi backend xử lý
+    await fetchNotifications(); // cập nhật lại số thông báo
     navigate('/my-feedback');
-  }, 300); // chờ 300ms
+  } catch (err) {
+    console.error('❌ Lỗi khi xử lý thông báo:', err);
+  }
 };
 
 

@@ -107,16 +107,31 @@ app.post('/api/writing/submit', async (req, res) => {
 });
 
 // Lấy danh sách bài viết
+// app.get('/api/writing/list', async (req, res) => {
+//   try {
+//     const submissions = await Submission.find()
+//     .populate('testId', 'index task1 task2 task1Image') // Thêm populate để lấy thông tin đề thi
+//     .sort({ submittedAt: -1 });
+//     res.json(submissions);
+//   } catch (err) {
+//     res.status(500).json({ message: 'Lỗi khi lấy danh sách bài viết' });
+//   }
+// });
 app.get('/api/writing/list', async (req, res) => {
+  const { phone } = req.query;
+
   try {
-    const submissions = await Submission.find()
-    .populate('testId', 'index task1 task2 task1Image') // Thêm populate để lấy thông tin đề thi
-    .sort({ submittedAt: -1 });
+    const query = phone ? { 'user.phone': phone } : {};
+    const submissions = await Submission.find(query)
+      .populate('testId', 'index task1 task2 task1Image')
+      .sort({ submittedAt: -1 });
+
     res.json(submissions);
   } catch (err) {
     res.status(500).json({ message: 'Lỗi khi lấy danh sách bài viết' });
   }
 });
+
 // Nhận xét bài viết
 // app.post('/api/writing/comment', async (req, res) => {
 //   const { submissionId, feedback } = req.body;
@@ -174,7 +189,7 @@ app.post('/api/writing/mark-feedback-seen', async (req, res) => {
   try {
     const result = await Submission.updateMany(
       { 'user.phone': phone, feedback: { $exists: true }, feedbackSeen: { $ne: true } },
-      { $set: { feedbackSeen: true } }
+      { $set: { feedbackSeen: Boolean(true) } }
     );
 
     res.json({
