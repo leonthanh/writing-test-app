@@ -8,6 +8,8 @@ const path = require('path');
 const app = express();
 app.use(cors());
 app.use(express.json());
+const authRoutes = require('./routes/auth');
+app.use('/api/auth', authRoutes);
 
 // Kết nối MongoDB
 mongoose.connect('mongodb://localhost:27017/ket_test', {
@@ -29,36 +31,36 @@ app.use('/api/writing-tests', writingTestsRoute);
 const User = require('./models/User');
 
 // Đăng ký
-app.post('/api/auth/register', async (req, res) => {
-  const { name, phone, role } = req.body;
-  if (!name || !phone) return res.status(400).json({ message: 'Thiếu thông tin' });
+// app.post('/api/auth/register', async (req, res) => {
+//   const { name, phone, role } = req.body;
+//   if (!name || !phone) return res.status(400).json({ message: 'Thiếu thông tin' });
 
-  const existing = await User.findOne({ phone });
-  if (existing) return res.status(409).json({ message: 'Số điện thoại đã tồn tại' });
+//   const existing = await User.findOne({ phone });
+//   if (existing) return res.status(409).json({ message: 'Số điện thoại đã tồn tại' });
 
-  try {
-    const newUser = new User({ name, phone, role: role || 'student' });
-    await newUser.save();
-    res.json({ user: newUser });
-  } catch (err) {
-    res.status(500).json({ message: 'Lỗi server khi đăng ký' });
-  }
-});
+//   try {
+//     const newUser = new User({ name, phone, role: role || 'student' });
+//     await newUser.save();
+//     res.json({ user: newUser });
+//   } catch (err) {
+//     res.status(500).json({ message: 'Lỗi server khi đăng ký' });
+//   }
+// });
 
-// Đăng nhập
-app.post('/api/auth/login', async (req, res) => {
-  const { name, phone, role } = req.body;
-  try {
-    let user = await User.findOne({ phone });
-    if (!user) {
-      user = new User({ name, phone, role });
-      await user.save();
-    }
-    res.json({ message: 'Đăng nhập thành công', user });
-  } catch (err) {
-    res.status(500).json({ message: 'Lỗi server khi đăng nhập' });
-  }
-});
+// // Đăng nhập
+// app.post('/api/auth/login', async (req, res) => {
+//   const { name, phone, role } = req.body;
+//   try {
+//     let user = await User.findOne({ phone });
+//     if (!user) {
+//       user = new User({ name, phone, role });
+//       await user.save();
+//     }
+//     res.json({ message: 'Đăng nhập thành công', user });
+//   } catch (err) {
+//     res.status(500).json({ message: 'Lỗi server khi đăng nhập' });
+//   }
+// });
 
 // Nộp bài viết
 const Submission = require('./models/Submission');

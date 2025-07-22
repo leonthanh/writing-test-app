@@ -88,7 +88,7 @@ const Login = () => {
         textAlign: 'center'
       }}>
         <h2 style={{ marginBottom: 20, fontWeight: 600 }}>
-          STAREDU - IX Writing's BRAD Teacher
+          STAREDU - IX Writing
         </h2>
 
         <input

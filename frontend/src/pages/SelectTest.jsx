@@ -43,7 +43,7 @@ const SelectTest = () => {
         
         <div style={{ textAlign: 'center', marginBottom: 30 }}>
           <img src={`${API_URL}/uploads/staredu.jpg`} alt="StarEdu" style={{ height: 60, marginBottom: 10 }} />
-          <h2 style={{ margin: 0 }}>📋 IX Writing's BRAD Teacher</h2>
+          <h2 style={{ margin: 0 }}>📋 IX Writing</h2>
         </div>
 
         {tests.length === 0 ? (

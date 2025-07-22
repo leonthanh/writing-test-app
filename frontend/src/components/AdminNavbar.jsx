@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 const AdminNavbar = () => {
@@ -7,6 +7,7 @@ const AdminNavbar = () => {
 
   const [unreviewed, setUnreviewed] = useState([]);
   const [dropdownVisible, setDropdownVisible] = useState(false);
+  const dropdownRef = useRef(null);
 
   useEffect(() => {
     const fetchUnreviewed = async () => {
@@ -24,6 +25,16 @@ const AdminNavbar = () => {
     const interval = setInterval(fetchUnreviewed, 30000);
     return () => clearInterval(interval);
   }, [API_URL]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownVisible(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('user');
@@ -46,14 +57,25 @@ const AdminNavbar = () => {
       justifyContent: 'space-between',
       alignItems: 'center',
       boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
+      position: 'relative'
     }}>
       <div style={{ display: 'flex', alignItems: 'center' }}>
         <Link to="/admin" style={linkStyle}>📄 Bài viết</Link>
         <Link to="/admin/create-writing" style={linkStyle}>✏️ Tạo đề</Link>
         <Link to="/review" style={linkStyle}>📝 Nhận xét bài</Link>
 
-        {/* 🔔 Chuông thông báo */}
-        <div style={{ position: 'relative', marginRight: '20px', cursor: 'pointer' }} onClick={() => setDropdownVisible(!dropdownVisible)}>
+        {/* 🔔 Chuông thông báo có hiệu ứng rung */}
+        <div
+          style={{
+            position: 'relative',
+            marginRight: '20px',
+            cursor: 'pointer',
+            fontSize: '20px',
+            animation: unreviewed.length > 0 ? 'shake 0.5s infinite' : 'none'
+          }}
+          onClick={() => setDropdownVisible(!dropdownVisible)}
+          title="Bài chưa chấm"
+        >
           🔔
           {unreviewed.length > 0 && (
             <span style={{
@@ -74,29 +96,40 @@ const AdminNavbar = () => {
 
         {/* 📥 Dropdown danh sách bài chưa chấm */}
         {dropdownVisible && (
-          <div style={{
-            position: 'absolute',
-            top: 60,
-            right: 20,
-            background: 'white',
-            color: 'black',
-            border: '1px solid #ccc',
-            borderRadius: 6,
-            padding: 10,
-            zIndex: 1000,
-            width: 300
-          }}>
+          <div
+            ref={dropdownRef}
+            style={{
+              position: 'absolute',
+              top: '60px',
+              right: '20px',
+              background: 'white',
+              color: 'black',
+              border: '1px solid #ccc',
+              borderRadius: 6,
+              padding: 10,
+              zIndex: 1000,
+              width: 320,
+              boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+            }}
+          >
             {unreviewed.length === 0 ? (
               <div>✅ Không có bài chưa chấm</div>
             ) : (
               unreviewed.map((sub, i) => (
                 <div
                   key={i}
-                  style={{ padding: '6px 0', cursor: 'pointer', borderBottom: '1px solid #eee' }}
+                  style={{
+                    padding: '8px',
+                    cursor: 'pointer',
+                    borderBottom: '1px solid #eee',
+                    transition: 'background 0.2s'
+                  }}
                   onClick={() => {
                     setDropdownVisible(false);
                     navigate(`/review/${sub._id}`);
                   }}
+                  onMouseOver={e => e.currentTarget.style.background = '#f0f0f0'}
+                  onMouseOut={e => e.currentTarget.style.background = 'white'}
                 >
                   👤 {sub.user?.name || 'N/A'} - 📞 {sub.user?.phone || 'N/A'}
                 </div>
@@ -123,6 +156,19 @@ const AdminNavbar = () => {
       >
         🔓 Đăng xuất
       </button>
+
+      {/* CSS animation cho chuông */}
+      <style>
+        {`
+          @keyframes shake {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(10deg); }
+            50% { transform: rotate(-10deg); }
+            75% { transform: rotate(10deg); }
+            100% { transform: rotate(0deg); }
+          }
+        `}
+      </style>
     </nav>
   );
 };
