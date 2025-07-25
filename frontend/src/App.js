@@ -8,7 +8,7 @@ import SelectTest from './pages/SelectTest';
 import ProtectedRoute from './components/ProtectedRoute';
 import MyFeedback from './pages/MyFeedback';
 import ReviewSubmission from './pages/ReviewSubmission';
-
+import AddListeningTest from './pages/AddListeningTest';
 import Review from './pages/Review'; 
 const isLoggedIn = () => {
   const user = localStorage.getItem('user');
@@ -33,6 +33,7 @@ function App() {
         <Route path="/review/:id" element={<ReviewSubmission />} />
         <Route path="/review" element={<ProtectedRoute role="teacher"><Review /></ProtectedRoute>} />
         {/* ✅ Trang giáo viên xem bài làm */}
+        <Route path="/admin/add-listening-test" element={<AddListeningTest />} />
         <Route path="/admin" element={
           <ProtectedRoute role="teacher">
             <AdminSubmissions />

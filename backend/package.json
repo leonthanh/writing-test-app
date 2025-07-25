@@ -3,22 +3,24 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
+    "body-parser": "^2.2.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.0",
     "express": "^5.1.0",
     "mongoose": "^8.16.1",
-    "multer": "^2.0.1",
+    "multer": "^2.0.2",
     "nodemailer": "^7.0.5",
     "react-split": "^2.0.14"
   },
   "devDependencies": {
     "@types/node": "^24.0.15"
-  }
+  },
+  "description": ""
 }

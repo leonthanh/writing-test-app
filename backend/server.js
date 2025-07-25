@@ -4,7 +4,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
-
+const bodyParser = require('body-parser');
+const listeningRoutes = require('./routes/listeningTest');
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -27,6 +28,12 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 const writingTestsRoute = require('./routes/writingTest');
 app.use('/api/writing-tests', writingTestsRoute);
 
+
+
+app.use(cors());
+app.use(bodyParser.json());
+app.use('/uploads', express.static('uploads')); // cho phép truy cập audio qua URL
+app.use('/api/listening-tests', listeningRoutes);
 // Model user
 const User = require('./models/User');
 
