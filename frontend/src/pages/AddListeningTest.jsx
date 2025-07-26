@@ -1,4 +1,6 @@
+// pages/AddListeningTest.jsx
 import React, { useState } from 'react';
+import QuestionEditor from '../components/QuestionEditor';
 
 const AddListeningTest = () => {
   const [testTitle, setTestTitle] = useState('');
@@ -52,7 +54,7 @@ const AddListeningTest = () => {
 
   return (
     <div style={{ padding: '40px', fontFamily: 'sans-serif' }}>
-      <h1>🎧 Tạo đề thi Listening IELTS (4 Sections - 40 câu)</h1>
+      <h1>🎧 Tạo đề thi IELTS Listening (4 Sections – 40 câu)</h1>
 
       <label><b>📄 Tên đề thi:</b></label><br />
       <input
@@ -83,17 +85,15 @@ const AddListeningTest = () => {
           {section.questions.map((q, qIndex) => (
             <div key={qIndex} style={{
               borderBottom: '1px solid #eee',
-              marginBottom: 15,
-              paddingBottom: 15
+              marginBottom: 20,
+              paddingBottom: 20
             }}>
-              <label><b>Câu {qIndex + 1}</b></label><br />
-              <input
-                type="text"
-                placeholder="Nội dung câu hỏi..."
-                value={q.questionText}
-                onChange={e => handleQuestionChange(sectionIndex, qIndex, 'questionText', e.target.value)}
-                style={{ width: '95%', marginBottom: 10 }}
-              /><br />
+              <label><b>Câu {qIndex + 1}</b></label>
+              <QuestionEditor
+                content={q.questionText}
+                setContent={(newContent) => handleQuestionChange(sectionIndex, qIndex, 'questionText', newContent)}
+              />
+
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
                 {q.options.map((opt, optIndex) => (
                   <input
@@ -105,8 +105,7 @@ const AddListeningTest = () => {
                     style={{ width: '45%' }}
                   />
                 ))}
-              </div>
-              <br />
+              </div><br />
               <label>✅ Đáp án đúng (A/B/C/D): </label>
               <input
                 type="text"

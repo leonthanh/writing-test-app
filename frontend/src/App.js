@@ -10,6 +10,8 @@ import MyFeedback from './pages/MyFeedback';
 import ReviewSubmission from './pages/ReviewSubmission';
 import AddListeningTest from './pages/AddListeningTest';
 import Review from './pages/Review'; 
+import DoListeningTest from './pages/DoListeningTest';
+
 const isLoggedIn = () => {
   const user = localStorage.getItem('user');
   return !!user;
@@ -33,8 +35,9 @@ function App() {
         <Route path="/review/:id" element={<ReviewSubmission />} />
         <Route path="/review" element={<ProtectedRoute role="teacher"><Review /></ProtectedRoute>} />
         {/* ✅ Trang giáo viên xem bài làm */}
+        
         <Route path="/admin/add-listening-test" element={<ProtectedRoute role="teacher"><AddListeningTest /></ProtectedRoute>} />
-
+        <Route path="/do-listening-test/:id" element={<DoListeningTest />} />
         <Route path="/admin" element={
           <ProtectedRoute role="teacher">
             <AdminSubmissions />

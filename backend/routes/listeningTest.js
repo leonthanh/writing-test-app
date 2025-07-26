@@ -3,7 +3,7 @@ const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
 const router = express.Router();
-
+const ListeningTest = require('../models/ListeningTest');
 // 🔧 Cài đặt lưu audio
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -17,6 +17,16 @@ const storage = multer.diskStorage({
   }
 });
 const upload = multer({ storage: storage });
+
+// 👉 GET /api/listening-tests/:i
+router.get('/:id', async (req, res) => {
+  try {
+    const test = await ListeningTest.findById(req.params.id);
+    res.json(test);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // 👉 POST /api/listening-tests/create
 router.post('/create', upload.single('audio'), (req, res) => {
