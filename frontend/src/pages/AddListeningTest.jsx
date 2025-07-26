@@ -3,25 +3,33 @@ import React, { useState } from 'react';
 const AddListeningTest = () => {
   const [testTitle, setTestTitle] = useState('');
   const [audioFile, setAudioFile] = useState(null);
-  const [sections, setSections] = useState([
-    { title: 'Section 1', questions: [] },
-    { title: 'Section 2', questions: [] },
-    { title: 'Section 3', questions: [] },
-    { title: 'Section 4', questions: [] },
-  ]);
+  const [sections, setSections] = useState(
+    Array(4).fill(0).map((_, secIndex) => ({
+      title: `Section ${secIndex + 1}`,
+      questions: Array(10).fill(0).map(() => ({
+        questionText: '',
+        options: ['', '', '', ''],
+        correctAnswer: '',
+      }))
+    }))
+  );
 
   const handleAudioUpload = (e) => {
     setAudioFile(e.target.files[0]);
   };
 
-  const handleAddQuestion = (sectionIndex) => {
-    const updatedSections = [...sections];
-    updatedSections[sectionIndex].questions.push({
-      questionText: '',
-      options: ['', '', '', ''],
-      correctAnswer: '',
-    });
-    setSections(updatedSections);
+  const handleQuestionChange = (sectionIndex, questionIndex, field, value) => {
+    const updated = [...sections];
+    if (field === 'questionText' || field === 'correctAnswer') {
+      updated[sectionIndex].questions[questionIndex][field] = value;
+    }
+    setSections(updated);
+  };
+
+  const handleOptionChange = (sectionIndex, questionIndex, optionIndex, value) => {
+    const updated = [...sections];
+    updated[sectionIndex].questions[questionIndex].options[optionIndex] = value;
+    setSections(updated);
   };
 
   const handleSubmit = async () => {
@@ -32,7 +40,7 @@ const AddListeningTest = () => {
 
     const res = await fetch(`${process.env.REACT_APP_API_URL}/api/listening-tests/create`, {
       method: 'POST',
-      body: formData
+      body: formData,
     });
 
     if (res.ok) {
@@ -43,19 +51,18 @@ const AddListeningTest = () => {
   };
 
   return (
-    <div style={{ padding: 40, fontFamily: 'sans-serif' }}>
-      <h1>➕ Thêm bài Listening mới</h1>
+    <div style={{ padding: '40px', fontFamily: 'sans-serif' }}>
+      <h1>🎧 Tạo đề thi Listening IELTS (4 Sections - 40 câu)</h1>
 
-      <label>🎓 Tên bài test:</label><br />
+      <label><b>📄 Tên đề thi:</b></label><br />
       <input
         type="text"
         value={testTitle}
         onChange={e => setTestTitle(e.target.value)}
-        style={{ width: '60%', marginBottom: 20 }}
-      />
+        style={{ width: '60%', padding: 10, marginBottom: 20 }}
+      /><br />
 
-      <br />
-      <label>🎧 Upload audio file:</label><br />
+      <label><b>🔊 Tải file audio:</b></label><br />
       <input
         type="file"
         accept="audio/*"
@@ -65,67 +72,63 @@ const AddListeningTest = () => {
 
       {sections.map((section, sectionIndex) => (
         <div key={sectionIndex} style={{
-          border: '1px solid #ddd',
-          marginBottom: 30,
-          padding: 20,
+          border: '1px solid #ccc',
           borderRadius: 10,
+          padding: 20,
+          marginBottom: 40,
           backgroundColor: '#f9f9f9'
         }}>
-          <h3>{section.title}</h3>
+          <h2 style={{ color: '#2c3e50' }}>{section.title}</h2>
+
           {section.questions.map((q, qIndex) => (
-            <div key={qIndex} style={{ marginBottom: 15 }}>
-              <label>Câu hỏi {qIndex + 1}:</label><br />
+            <div key={qIndex} style={{
+              borderBottom: '1px solid #eee',
+              marginBottom: 15,
+              paddingBottom: 15
+            }}>
+              <label><b>Câu {qIndex + 1}</b></label><br />
               <input
                 type="text"
-                placeholder="Nhập câu hỏi..."
+                placeholder="Nội dung câu hỏi..."
                 value={q.questionText}
-                onChange={e => {
-                  const updated = [...sections];
-                  updated[sectionIndex].questions[qIndex].questionText = e.target.value;
-                  setSections(updated);
-                }}
-                style={{ width: '90%' }}
-              />
-              <br />
-              <label>🔘 Options:</label><br />
-              {q.options.map((opt, i) => (
-                <input
-                  key={i}
-                  type="text"
-                  placeholder={`Đáp án ${String.fromCharCode(65 + i)}`}
-                  value={opt}
-                  onChange={e => {
-                    const updated = [...sections];
-                    updated[sectionIndex].questions[qIndex].options[i] = e.target.value;
-                    setSections(updated);
-                  }}
-                  style={{ width: '40%', marginRight: 10 }}
-                />
-              ))}
+                onChange={e => handleQuestionChange(sectionIndex, qIndex, 'questionText', e.target.value)}
+                style={{ width: '95%', marginBottom: 10 }}
+              /><br />
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                {q.options.map((opt, optIndex) => (
+                  <input
+                    key={optIndex}
+                    type="text"
+                    placeholder={`Đáp án ${String.fromCharCode(65 + optIndex)}`}
+                    value={opt}
+                    onChange={e => handleOptionChange(sectionIndex, qIndex, optIndex, e.target.value)}
+                    style={{ width: '45%' }}
+                  />
+                ))}
+              </div>
               <br />
               <label>✅ Đáp án đúng (A/B/C/D): </label>
               <input
                 type="text"
-                value={q.correctAnswer}
-                onChange={e => {
-                  const updated = [...sections];
-                  updated[sectionIndex].questions[qIndex].correctAnswer = e.target.value.toUpperCase();
-                  setSections(updated);
-                }}
                 maxLength={1}
+                value={q.correctAnswer}
+                onChange={e => handleQuestionChange(sectionIndex, qIndex, 'correctAnswer', e.target.value.toUpperCase())}
+                style={{ width: 50 }}
               />
             </div>
           ))}
-          <button onClick={() => handleAddQuestion(sectionIndex)}>➕ Thêm câu hỏi</button>
         </div>
       ))}
 
       <button
         onClick={handleSubmit}
         style={{
-          backgroundColor: '#28a745', color: 'white',
-          padding: '12px 24px', border: 'none',
-          borderRadius: 8, fontSize: 18
+          backgroundColor: '#2ecc71',
+          color: 'white',
+          padding: '12px 30px',
+          border: 'none',
+          borderRadius: 8,
+          fontSize: 18
         }}
       >
         📤 Gửi bài test

@@ -33,7 +33,8 @@ function App() {
         <Route path="/review/:id" element={<ReviewSubmission />} />
         <Route path="/review" element={<ProtectedRoute role="teacher"><Review /></ProtectedRoute>} />
         {/* ✅ Trang giáo viên xem bài làm */}
-        <Route path="/admin/add-listening-test" element={<AddListeningTest />} />
+        <Route path="/admin/add-listening-test" element={<ProtectedRoute role="teacher"><AddListeningTest /></ProtectedRoute>} />
+
         <Route path="/admin" element={
           <ProtectedRoute role="teacher">
             <AdminSubmissions />

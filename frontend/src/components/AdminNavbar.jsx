@@ -63,6 +63,7 @@ const AdminNavbar = () => {
         <Link to="/admin" style={linkStyle}>📄 Bài viết</Link>
         <Link to="/admin/create-writing" style={linkStyle}>✏️ Tạo đề</Link>
         <Link to="/review" style={linkStyle}>📝 Nhận xét bài</Link>
+        <Link to="/admin/add-listening-test" style={linkStyle}>➕ Tạo đề Listening</Link>
 
         {/* 🔔 Chuông thông báo có hiệu ứng rung */}
         <div
